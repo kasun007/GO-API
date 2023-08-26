@@ -25,10 +25,24 @@ func getBooks(c *gin.Context) {
 
 }
 
+func creteBooks(c *gin.Context) {
+
+	var newBook book
+
+	if err := c.BindJSON(&newBook); err != nil {
+		return
+	}
+
+	books = append(books, newBook)
+	c.IndentedJSON(http.StatusCreated, newBook)
+
+}
+
 func main() {
 
 	fmt.Print("Hello World")
 	router := gin.Default()
 	router.GET("/books", getBooks)
+	router.POST("/books", creteBooks)
 	router.Run("localhost:8080")
 }

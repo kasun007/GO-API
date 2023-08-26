@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -38,11 +39,30 @@ func creteBooks(c *gin.Context) {
 
 }
 
+func getBookById(id string) (*book, error) {
+	for _, a := range books {
+		if a.ID == id {
+			return &a, nil
+		}
+	}
+	return nil, errors.New("book not found")
+}
+
+func bookById(c *gin.Context) {
+	id := c.Param("id")
+	book, err := getBookById(id)
+	if err != nil {
+		return
+	}
+	c.IndentedJSON(http.StatusOK, book)
+}
+
 func main() {
 
 	fmt.Print("Hello World")
 	router := gin.Default()
 	router.GET("/books", getBooks)
 	router.POST("/books", creteBooks)
+	router.GET("/books/:id", bookById)
 	router.Run("localhost:8080")
 }

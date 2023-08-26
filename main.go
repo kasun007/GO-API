@@ -48,6 +48,29 @@ func getBookById(id string) (*book, error) {
 	return nil, errors.New("book not found")
 }
 
+func checkoutBook(c *gin.Context) {
+
+	id, ok := c.GetQuery("id")
+
+	if !ok {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not found"})
+		return
+	}
+	book, err := getBookById(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not found"})
+		return
+	}
+
+	if book.Quantity == 0 {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not found"})
+		return
+	}
+	book.Quantity = book.Quantity - 1
+	c.IndentedJSON(http.StatusOK, book)
+
+}
+
 func bookById(c *gin.Context) {
 	id := c.Param("id")
 	book, err := getBookById(id)
@@ -55,6 +78,19 @@ func bookById(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not found"})
 		return
 	}
+
+	c.IndentedJSON(http.StatusOK, book)
+}
+
+func returnBook(c *gin.Context) {
+	id := c.Param("id")
+	book, err := getBookById(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not found"})
+		return
+	}
+
+	book.Quantity = book.Quantity + 1
 	c.IndentedJSON(http.StatusOK, book)
 }
 
@@ -65,5 +101,7 @@ func main() {
 	router.GET("/books", getBooks)
 	router.POST("/books", creteBooks)
 	router.GET("/books/:id", bookById)
+	router.GET("/checkout", checkoutBook)
+	router.GET("/return/:id", returnBook)
 	router.Run("localhost:8080")
 }
